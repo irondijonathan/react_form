@@ -8,10 +8,19 @@ import Grid from '@mui/material/Grid';
 import Snackbar from '@mui/material/Snackbar';
 import Typography from '@mui/material/Typography';
 import logo from '../../assets/logo.svg';
+import App from '../../App';
+import { validate } from 'email-validator';
 
 
 export default function LoginForm() {
   const [showAlert, setShowAlert] = useState(false);
+  const [isValidEmail, setIsValidEmail] = useState(false);
+  const [isValidPassword, setIsValidPassword] = useState(false);
+  const [lengthError, setLengthError] = useState("");
+  const [specialCharacterError, setSpecialCharacterError] = useState("");
+  const [numericError, setNumericError] = useState("");
+  const [caseCheckError, setCaseCheckError] = useState("")
+  const [emailError, setEmailError] = useState("")
   const validateForm = (event) => {
     event.preventDefault()
     const data = new FormData(event.currentTarget);
@@ -19,8 +28,84 @@ export default function LoginForm() {
     const password = data.get('password');
 
     // Add validation code here
+    
+    //email validator
 
+    const emailValidation = (email) => {
+      const isValidEmail = validate(email); // Use the validate function to check email format
+      console.log(isValidEmail)
+      
+      if (isValidEmail) {
+        setIsValidEmail(true);
+        passwordLengthCheck();
+      } else {
+        setIsValidEmail(false);
+        setEmailError("Email format is not correct");
+      }
+    };
+
+
+    //password validator
+    const specialCharacters = ["!","@","£","$","%"]
+  
+    
+    const passwordLengthCheck = () => {
+      
+      if(password.length >= 8) {
+        setIsValidPassword(true)
+        handleSubmit();
+      } else {
+        setIsValidPassword(false)
+        setLengthError("Password must be greater than 8 characters")
+      }
+      
+    };
+   
+
+    const passwordCharacterCheck = () => {
+      if(password.includes(specialCharacters.some)) {
+        setIsValidPassword(true)
+        handleSubmit();
+      } else {
+        setIsValidPassword(false);
+        setSpecialCharacterError("Password must contain a special character")
+      }
+    }
+
+    const passwordNumericCheck = () => {
+      if(password.includes(Number())) {
+        setIsValidPassword(true)
+        handleSubmit();
+      } else {
+        setIsValidPassword(false);
+        setNumericError("Password must contain a numeric character")
+      }
+    
+    }
+
+    const caseCheck = () => {
+      if (/^(?=.*[a-z])(?=.*[A-Z]).+$/.test(password)) {
+        setIsValidPassword(true);
+        handleSubmit();
+      } else {
+        setIsValidPassword(false);
+        setCaseCheckError("Password must contain at least one uppercase and one lowercase character");
+      }
+    };
+    
+
+
+
+    emailValidation(email);
+    passwordLengthCheck();
+    passwordCharacterCheck();
+    passwordNumericCheck();
+    caseCheck();
+   
   }
+
+
+  
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -30,11 +115,15 @@ export default function LoginForm() {
       password: data.get('password'),
     });
     validateForm(event);
-    setShowAlert("Login Successful");
+    isValidPassword &&  setShowAlert("Login Successful");
+    //isValidEmail && setShowAlert("Email Correct");
   };
+
+  
 
   return (
     <>
+      
       {showAlert &&
         <Snackbar
           open={showAlert}
@@ -106,6 +195,21 @@ export default function LoginForm() {
             >
               Sign In
             </Button>
+            {lengthError  && <p style={{
+              color: "red",
+            }}>{lengthError}</p>}
+             {specialCharacterError  && <p style={{
+              color: "red",
+            }}>{specialCharacterError}</p>}
+            {numericError  && <p style={{
+              color: "red",
+            }}>{numericError}</p>}
+            {caseCheckError  && <p style={{
+              color: "red",
+            }}>{caseCheckError}</p>}
+            {emailError  && <p style={{
+              color: "red",
+            }}>{emailError}</p>}
           </Box>
         </Box>
       </Grid>
